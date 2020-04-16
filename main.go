@@ -26,9 +26,10 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/orgs", orgs)
 	fmt.Printf("FLAGS %+v\n", flags)
-	log.Fatal(http.ListenAndServe("127.0.0.1:" + flags.Port, r))
+	log.Fatal(http.ListenAndServe(":" + flags.Port, r))
 }
 
+// orgs will send an array of the organizations found on the chef server
 func orgs( w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	client := chefapi_client.Client()
@@ -40,8 +41,17 @@ func orgs( w http.ResponseWriter, r *http.Request) {
 	   w.Write([]byte(msg))
 	   return
 	}
-	orgJson, err := json.Marshal(orgList)
-	// TODO: deal with the err
+	orgNames := make([]string, 0, len(orgList))
+	for k := range orgList {
+		orgNames = append(orgNames, k)
+	}
+	orgJson, err := json.Marshal(orgNames)
+	if err != nil {
+	   w.WriteHeader(http.StatusInternalServerError)
+	   msg := fmt.Sprintf(`{"message": "%+v"}`, err)
+	   w.Write([]byte(msg))
+	   return
+	}
 	w.WriteHeader(http.StatusOK)
 	w.Write(orgJson)
 	return
