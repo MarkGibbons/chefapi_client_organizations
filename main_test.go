@@ -2,10 +2,10 @@ package main
 
 import (
 	// "fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"github.com/gorilla/mux"
 )
 
 // authCheck( w http.ResponseWriter, r *http.Request) {
@@ -18,7 +18,7 @@ func TestAuthCheck(t *testing.T) {
 	rr := httptest.NewRecorder()
 	// Invoke authCheck
 	newAuthCheckServer().ServeHTTP(rr, req)
-	if status := rr.Code; status!= http.StatusOK {
+	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("AuthCheck status code is not ok. Got: %v want: %v\n", status, http.StatusOK)
 	}
 	wantBody := `{"node":"mynode","user":"myuser","auth":true}`
@@ -35,7 +35,7 @@ func TestAuthCheck(t *testing.T) {
 	// Invoke authCheck
 	newAuthCheckServer().ServeHTTP(rr, req)
 	// Check the status code and response body - unauthorized case
-	if status := rr.Code; status!= http.StatusOK {
+	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("AuthCheck status code is not ok. Got: %v want: %v\n", status, http.StatusOK)
 	}
 	wantBody = `{"node":"mynode","user":"otheruser","auth":false}`
@@ -52,7 +52,7 @@ func TestAuthCheck(t *testing.T) {
 	// Invoke authCheck
 	newAuthCheckServer().ServeHTTP(rr, req)
 	// Check the status code and response body - unauthorized case
-	if status := rr.Code; status!= http.StatusBadRequest {
+	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("AuthCheck status code is not expected. Got: %v want: %v\n", status, http.StatusBadRequest)
 	}
 	wantBody = `{"message":"Bad url input value"}`
@@ -65,7 +65,7 @@ func TestAuthCheck(t *testing.T) {
 func TestCleanInput(t *testing.T) {
 	expected_in := "mynode"
 	in, ok := cleanInput(expected_in)
-        if !ok {
+	if !ok {
 		t.Errorf("Error cleaning: %+v Err: %+v\n", expected_in, ok)
 	}
 	if in != expected_in {
@@ -73,7 +73,7 @@ func TestCleanInput(t *testing.T) {
 	}
 	expected_in = "\nbounceit"
 	in, ok = cleanInput(expected_in)
-        if ok {
+	if ok {
 		t.Errorf("CleanInput did not receive expected error cleaning: %+v Err: %+v\n", expected_in, ok)
 	}
 	if in != expected_in {
@@ -92,7 +92,7 @@ func TestDefaultResp(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	// Check the status code and response body
-	if status := rr.Code; status!= http.StatusBadRequest {
+	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("Status code is not expected. Got: %v want: %v\n", status, http.StatusBadRequest)
 	}
 	wantBody := `{"message":"GET /auth/NODE/user/USER is the only valid method"}`
@@ -112,7 +112,7 @@ func TestInputerror(t *testing.T) {
 	// Invoke authCheck
 	newAuthCheckServer().ServeHTTP(rr, req)
 	// Check the status code and response body - unauthorized case
-	if status := rr.Code; status!= http.StatusBadRequest {
+	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("AuthCheck status code is not expected. Got: %v want: %v\n", status, http.StatusBadRequest)
 	}
 	wantBody := `{"message":"Bad url input value"}`
@@ -125,12 +125,12 @@ func TestInputerror(t *testing.T) {
 func TestVerifyAccess(t *testing.T) {
 	expected_hit := `{"node":"mynode","user":"myuser","auth":true}`
 	hit := verifyAccess("mynode", "myuser")
-        if hit != expected_hit {
+	if hit != expected_hit {
 		t.Errorf("Unexpected return: Wanted: %+v Got: %+v", expected_hit, hit)
 	}
 	expected_miss := `{"node":"mynode","user":"otheruser","auth":false}`
 	miss := verifyAccess("mynode", "otheruser")
-        if hit != expected_hit {
+	if hit != expected_hit {
 		t.Errorf("Unexpected return: Wanted: %+v Got: %+v", expected_miss, miss)
 	}
 }
