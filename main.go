@@ -7,6 +7,7 @@ import (
 	"github.com/MarkGibbons/chefapi_client"
 	"github.com/gorilla/mux"
 	"log"
+	"net"
 	"net/http"
 )
 
@@ -23,8 +24,11 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/orgs", orgs)
-	fmt.Printf("FLAGS %+v\n", flags)
-	log.Fatal(http.ListenAndServe(":"+flags.Port, r))
+	l, err := net.Listen("tcp4", ":"+flags.Port)
+	if err != nil {
+		panic(err.Error)
+	}
+	log.Fatal(http.ServeTLS(l, r, flags.Cert, flags.Key))
 }
 
 // orgs will send an array of the organizations found on the chef server
