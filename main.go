@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/MarkGibbons/chefapi_client"
+	"github.com/MarkGibbons/chefapi_lib"
 	"github.com/gorilla/mux"
 	"log"
 	"net"
@@ -34,18 +34,11 @@ func main() {
 // orgs will send an array of the organizations found on the chef server
 func orgs(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	client := chefapi_client.Client()
-	orgList, err := client.Organizations.List()
-	fmt.Printf("ORGLIST %+v ERR %+v", orgList, err)
+	orgNames, err := chefapi_lib.AllOrgs()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		msg := fmt.Sprintf(`{"message": "%+v"}`, err)
-		w.Write([]byte(msg))
+		msg, code := chefapi_lib.ChefStatus(err)
+                http.Error(w, msg, code)
 		return
-	}
-	orgNames := make([]string, 0, len(orgList))
-	for k := range orgList {
-		orgNames = append(orgNames, k)
 	}
 	orgJson, err := json.Marshal(orgNames)
 	if err != nil {
