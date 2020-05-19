@@ -37,16 +37,19 @@ func orgs(w http.ResponseWriter, r *http.Request) {
 	orgNames, err := chefapi_lib.AllOrgs()
 	if err != nil {
 		msg, code := chefapi_lib.ChefStatus(err)
-                http.Error(w, msg, code)
+		http.Error(w, msg, code)
+		fmt.Printf("Orgs List err %+v msg %+v code %+v\n", err, msg, code)
 		return
 	}
 	orgJson, err := json.Marshal(orgNames)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		msg := fmt.Sprintf(`{"message": "%+v"}`, err)
+		fmt.Printf("Orgs JSON err %+v\n", err)
 		w.Write([]byte(msg))
 		return
 	}
+	fmt.Printf("List Orgs\n")
 	w.WriteHeader(http.StatusOK)
 	w.Write(orgJson)
 	return
